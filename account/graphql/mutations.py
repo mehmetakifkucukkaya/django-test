@@ -1,6 +1,8 @@
 import graphene
 from django.contrib.auth import get_user_model
 import graphql_jwt
+from ..permissions import AllowAny, IsAuthenticated, IsAdminUser
+from .decorators import permission_required
 
 class CreateUser(graphene.Mutation):
     class Arguments:
@@ -11,6 +13,7 @@ class CreateUser(graphene.Mutation):
     success = graphene.Boolean()
     errors = graphene.List(graphene.String)
 
+    @permission_required([AllowAny])
     def mutate(self, info, username, email, password):
         try:
             user = get_user_model()(

@@ -1,19 +1,17 @@
 import graphene
 from django.contrib.auth import get_user_model
 from .types import UserType
+from ..permissions import IsAuthenticated, AllowAny
+from .decorators import permission_required
 
 class AccountQueries(graphene.ObjectType):
     me = graphene.Field(UserType)
     users = graphene.List(UserType)
 
-    @staticmethod
-    def resolve_me(root, info, **kwargs):
-        if info.context.user.is_authenticated:
-            return info.context.user
-        return None
+    @permission_required([IsAuthenticated])
+    def resolve_me(self, info, **kwargs):
+        return info.context.user
 
-    @staticmethod
-    def resolve_users(root, info, **kwargs):
-        if info.context.user.is_authenticated:
-            return get_user_model().objects.all()
-        return None
+    @permission_required([IsAuthenticated])
+    def resolve_users(self, info, **kwargs):
+        return get_user_model().objects.all()
